@@ -39,54 +39,41 @@
 // }
 
 // stage 3:
-import ollama from "ollama";
-import fs from "fs/promises";
-import path from "path";
+import fs from 'fs';
+import ollama from 'ollama';
 
-async function readQuestionsAndAnswer() {
-  const questionsFolder = "./Questions";
-  const answersFolder = "./Answers";
+let folder = 'Questions';
 
-  try {
-    // Ensure the Answers folder exists
-    await fs.mkdir(answersFolder, { recursive: true });
-
-    // Read all files in the Questions folder
-    const questionFiles = await fs.readdir(questionsFolder);
-
-    // Process each question file sequentially
-    for (const file of questionFiles) {
-      const questionPath = path.join(questionsFolder, file);
-      const answerPath = path.join(answersFolder, file);
-
-      try {
-        const questionContent = await fs.readFile(questionPath, "utf-8");
-        const answerContent = await askQuestion(questionContent);
-        await fs.writeFile(answerPath, answerContent);
-        console.log(`Processed: ${file}`);
-      } catch (error) {
-        console.error(`Error processing ${file}:, error.message`);
-      }
-    }
-
-    console.log("All questions processed.");
-  } catch (error) {
-    console.error("Error reading questions:", error.message);
-  }
-}
-
-async function askQuestion(question) {
+async function runChat(question) {
   try {
     const response = await ollama.chat({
-      model: "llama3.2:latest",
-      messages: [{ role: "user", content: question }],
+      model: "llama3.2:1b",
+      messages: [{ role: 'user', content: question }]
     });
+
     return response.message.content;
   } catch (error) {
-    console.error("Error occurred while asking question:", error.message);
-    throw error;
+    console.error("Error occurred:", error.message);
   }
 }
 
-// Call the main function
-readQuestionsAndAnswer();
+
+fs.readdir(folder, (err, files) => {
+  if (err) {
+    return console.error('Error reading directory:', err.message);
+  }
+
+  files.forEach((file) => {
+    const filepath = `${folder}/${file}`;
+    fs.readFile(filepath, 'utf8', async (err, question) => {
+      if (err) {
+        return console.error(`Error reading file ${file}:`, err.message);
+      }
+      let ans_file = file
+      const response = await runChat(question);
+      fs.mkdirSync('Answers', { recursive: true })
+      let answer_path = `Answers/${ans_file.replace('Q','A')}`
+      fs.appendFileSync(answer_path, response)
+    });
+  });
+});
