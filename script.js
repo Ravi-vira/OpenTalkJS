@@ -1,4 +1,3 @@
-//task 1
 // import ollama from "ollama";
 
 // async function runChat() {
@@ -16,40 +15,30 @@
 
 // runChat();
 
-
-// task 2
+//Stage 2:
 
 // import ollama from "ollama";
 // import fs from "fs";
 
-// async function processQuestion() {
-//   try {
-    
-//     let q = fs.readFileSync("./q.txt", "utf-8");
-//     console.log("Question:", q);
+// let q= fs.readFileSync("./q1.txt", "utf-8");
+// console.log(q)
 
-   
+// askQuestion()
+// async function askQuestion() {
+//   try {
 //     const response = await ollama.chat({
 //       model: "llama3.2:latest",
-//       messages: [{ role: "user", content: q }],
+//       messages: [{ role: 'user', content: q }]
 //     });
 
-    
-//     fs.writeFileSync("./a.txt", response.message.content);
-//     console.log("Response written to a.txt");
+//     fs.writeFileSync("./a1.txt", response.message.content);
+
 //   } catch (error) {
 //     console.error("Error occurred:", error.message);
 //   }
 // }
 
-
-// (async () => {
-//   await processQuestion();
-// })();
-
-
-//Task 3
-
+// stage 3:
 import ollama from "ollama";
 import fs from "fs/promises";
 import path from "path";
@@ -65,22 +54,20 @@ async function readQuestionsAndAnswer() {
     // Read all files in the Questions folder
     const questionFiles = await fs.readdir(questionsFolder);
 
-    // Process each question file
-    await Promise.all(
-      questionFiles.map(async (file) => {
-        const questionPath = path.join(questionsFolder, file);
-        const answerPath = path.join(answersFolder, file);
+    // Process each question file sequentially
+    for (const file of questionFiles) {
+      const questionPath = path.join(questionsFolder, file);
+      const answerPath = path.join(answersFolder, file);
 
-        try {
-          const questionContent = await fs.readFile(questionPath, "utf-8");
-          const answerContent = await askQuestion(questionContent);
-          await fs.writeFile(answerPath, answerContent);
-          console.log(`Processed: ${file}`);
-        } catch (error) {
-          console.error(`Error processing ${file}:`, error.message);
-        }
-      })
-    );
+      try {
+        const questionContent = await fs.readFile(questionPath, "utf-8");
+        const answerContent = await askQuestion(questionContent);
+        await fs.writeFile(answerPath, answerContent);
+        console.log(`Processed: ${file}`);
+      } catch (error) {
+        console.error(`Error processing ${file}:, error.message`);
+      }
+    }
 
     console.log("All questions processed.");
   } catch (error) {
@@ -103,4 +90,3 @@ async function askQuestion(question) {
 
 // Call the main function
 readQuestionsAndAnswer();
-
