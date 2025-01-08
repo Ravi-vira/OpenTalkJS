@@ -2,5 +2,5 @@
   "dependencies": {
     "ollama": "^0.5.11"
   },
-  "type":"module"
+  "type":"todo.cjs"
 }
